@@ -1,13 +1,29 @@
 #include <iostream>
 #include <mpi.h>
 
-
+#include "squirrel_actor.h"
 #include "squirrel-functions.h"
+
+#include <vector>
 
 using namespace std;
 
 int main(){
 
+  vector<int> vect;
+  vect.reserve(50);
+  cout << vect.size() << endl;
+
+
+  cout << "hello world" << endl;
+  SquirrelActor sq(true,0.,0.);
+
+  for(int i=0;i<10;i++){
+    sq.step();
+  }
+
+
+/*
   cout << "hello world\n";
   cout << getCellFromPosition(1.524, 1.234) << "\n";
   long l = 12345L;
@@ -33,4 +49,5 @@ int main(){
   }
 
   MPI_Finalize();
+  */
 }

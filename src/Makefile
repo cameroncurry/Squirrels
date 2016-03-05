@@ -1,4 +1,3 @@
-
 CXX=g++
 MPICXX=mpic++
 
@@ -6,15 +5,16 @@ EXE=squirrels
 
 PROVIDED_DIR=../provided/
 
-SRC=$(PROVIDED_DIR)ran2.c $(PROVIDED_DIR)squirrel-functions.c
-OBJ=ran2.o squirrel-functions.o
+SRC=$(PROVIDED_DIR)ran2.c $(PROVIDED_DIR)squirrel-functions.c squirrel_actor.cpp
+OBJ = $(addsuffix .o,$(basename $(SRC)))
+
+x=$(subst $(PROVIDED_DIR),,$(OBJ))
 
 all: $(OBJ)
-	$(MPICXX) -o $(EXE) -I$(PROVIDED_DIR) $(OBJ) $(EXE).cpp
+	$(MPICXX) -o $(EXE) -I$(PROVIDED_DIR) $(notdir $(OBJ)) $(EXE).cpp
 
-clean:
-	rm -f *.o
-	rm -f squirrels
+.cpp.o:
+	$(CXX) -c -I$(PROVIDED_DIR) -o $@ $<
 
-%.o:
-	$(CXX) -c -o $@ $(PROVIDED_DIR)$(@:.o=.c)
+.c.o:
+	$(CXX) -c -o $(notdir $@) $<
