@@ -1,20 +1,27 @@
-CXX=g++
-MPICXX=mpic++
+CXX=mpic++ -w
 
 EXE=squirrels
 
-PROVIDED_DIR=../provided/
+SQURL_DIR=../provided/
+SQURL_SRC=$(SQURL_DIR)ran2.c $(SQURL_DIR)squirrel-functions.c
+SQURL_OBJ=$(SQURL_SRC:.c=.o)
 
-SRC=$(PROVIDED_DIR)ran2.c $(PROVIDED_DIR)squirrel-functions.c squirrel_actor.cpp
-OBJ = $(addsuffix .o,$(basename $(SRC)))
+PROC_POOL_DIR=../processpool/
+PROC_POOL_SRC=$(PROC_POOL_DIR)pool.c
+PROC_POOL_OBJ=$(PROC_POOL_SRC:.c=.o)
 
-x=$(subst $(PROVIDED_DIR),,$(OBJ))
+SRC=actor.cpp master_actor.cpp
+OBJ=$(SRC:.cpp=.o)
 
-all: $(OBJ)
-	$(MPICXX) -o $(EXE) -I$(PROVIDED_DIR) $(notdir $(OBJ)) $(EXE).cpp
+
+all: $(PROC_POOL_OBJ) $(OBJ)
+	$(CXX) -o $(EXE) -I$(PROC_POOL_DIR) $(notdir $(PROC_POOL_OBJ)) $(OBJ) $(EXE).cpp
+
+clean:
+	rm -f *.o $(EXE)
 
 .cpp.o:
-	$(CXX) -c -I$(PROVIDED_DIR) -o $@ $<
+	$(CXX) -c -I$(SQURL_DIR) -I$(PROC_POOL_DIR) -o $@ $<
 
 .c.o:
 	$(CXX) -c -o $(notdir $@) $<
