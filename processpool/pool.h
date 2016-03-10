@@ -27,7 +27,7 @@ int workerSleep();
 // Determines whether the current worker should stop or not (i.e. whether the pool is shutting down)
 int shouldWorkerStop();
 // Called by the master or a worker to start a new worker process
-int startWorkerProcess();
+int startWorkerProcess(int data);
 // Called by a worker to shut the pool down
 void shutdownPool();
 // Retrieves the optional data associated with the command, provides an example of how this can be done
