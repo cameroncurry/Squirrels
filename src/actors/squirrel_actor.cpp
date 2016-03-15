@@ -21,11 +21,12 @@ void SquirrelActor::act(){
   //send to grid cell I am in if I'm infected/not infected
   //then receive back pop influx and infection level
   int cell = getCellFromPosition(x,y);
+  std::cout << "squirrel stepping into cell "<< cell << std::endl;
   //use tag to show which cell I'm stepping into
   MPI_Ssend(&infected,1, MPI_INT, grid_rank, cell, MPI_COMM_WORLD);
 
-  float cellValues[2]; // {pop influx, infection level}
-  MPI_Recv(cellValues,2,MPI_FLOAT, grid_rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  int cellValues[2]; // {pop influx, infection level}
+  MPI_Recv(cellValues,2,MPI_INT, grid_rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   std::cout << "squirrel received values from cell: " << cellValues[0] << " " << cellValues[1] << std::endl;
 
   /*

@@ -29,7 +29,7 @@ using namespace std;
 int main(){
 
   int grids = 3;
-  int squirrels = 2;
+  int squirrels = 5;
   int infect_squirrels = 1;
 
   /*
@@ -79,7 +79,7 @@ int main(){
       a = &g;
     }
     else if(actor_type == SQUIRREL_ACTOR){
-      SquirrelActor s = SquirrelActor(0); //cout << "squirrel actor created" << endl;
+      SquirrelActor s = SquirrelActor(0);
       a = &s;
     }
     else if(actor_type == INFECTED_SQUIRREL_ACTOR){

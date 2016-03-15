@@ -16,25 +16,28 @@
  */
 class Cell {
 public:
-  int pop_influx[3];
+  int pop_influx[3]; //population influx for the past 3 months
+  int inft_level[2]; //infection level for the past 2 months
   int population_influx();
+  int infection_level();
 };
 
 class GridActor: public Actor
 {
 public:
   GridActor();
-  ~GridActor();
   void act();
 private:
-  int n_cells;
+  int n_cells = 16;
   int month;
-  Cell cell;
+  Cell cells[16];
 
-  float* gridValues; //gridValues = {population_influx, infection_level}
-  void advanceMonth(); //move grid cells to next month
+  int** pop_influx;
+
+  void initialiseCells();
+  void advanceMonth();
+  void handleSqurrielMessage();
+
 };
-
-
 
 #endif

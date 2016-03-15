@@ -32,7 +32,7 @@ void MasterActor::act(){
   MPI_Ssend(NULL,0,MPI_INT, grid_rank, GRID_NEW_MONTH, MPI_COMM_WORLD);
   usleep(500000);
   MPI_Ssend(NULL,0,MPI_INT, grid_rank, GRID_NEW_MONTH, MPI_COMM_WORLD);
-
+  usleep(500000);
   MPI_Ssend(NULL,0,MPI_INT, grid_rank, GRID_SHUTDOWN, MPI_COMM_WORLD);
   std::cout << " master finished counting months - exit" << std::endl;
 
