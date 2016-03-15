@@ -7,8 +7,8 @@ public:
   Actor();
   virtual void act();
 protected:
-  int m_rank;
-  int m_size;
+  int rank;
+  int size;
 };
 
 #endif
