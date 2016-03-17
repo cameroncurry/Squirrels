@@ -6,12 +6,16 @@
 class MasterActor: public Actor
 {
 public:
-  MasterActor(int grid_rank, int N_squirrels, int* squirrel_ranks);
+  MasterActor(int N_grids, int*grid_ranks, int N_squirrels, int* squirrel_ranks);
   ~MasterActor();
   void act();
 private:
-  int grid_rank;
+  int N_grids;
+  int* grid_ranks;
   int N_squirrels;
   int* squirrel_ranks;
+
+  void distributeGridRanks();
+  void advanceMonth();
 };
 #endif

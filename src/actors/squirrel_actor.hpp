@@ -2,17 +2,33 @@
 #define SQUIRREL_H
 
 #include "actor.hpp"
+#include <vector>
 
 class SquirrelActor: public Actor
 {
 public:
   SquirrelActor(int infected);
+  ~SquirrelActor();
   void act();
 private:
   long state;
-  int infected; //0 - not infected, 1 - infected
-  int grid_rank; //rank of grid actor to send messages to
+  int acting;
+  int steps;
+  int infected;
+  int infected_step; //step at which squirrel became infected 
+  int N_grids;
+  int* grid_ranks;
   float x,y;
+
+  int pop_influxes[50];
+  int infect_levels[50];
+
+  void waitForGridRanks();
+  void stepIntoCell();
+  float averagePopInflux();
+  float averageInfectionLevel();
+
+
 };
 
 #endif

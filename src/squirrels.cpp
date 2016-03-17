@@ -28,9 +28,9 @@ using namespace std;
 
 int main(){
 
-  int grids = 3;
-  int squirrels = 5;
-  int infect_squirrels = 1;
+  int grid_cells = 16;
+  int squirrels = 8;
+  int infect_squirrels = 4;
 
   /*
    * Create actors
@@ -47,9 +47,12 @@ int main(){
    */
   if(statuscode == 2){
 
-    //create 1 grid actor to handle all crid cells
-    int grid_actor_rank = startWorkerProcess(GRID_ACTOR);
-    cout << "master created grid actor on rank " << grid_actor_rank << endl;
+    //create grid cells
+    int* grid_ranks = new int[grid_cells];
+    for(int i=0;i<grid_cells;i++){
+      int workerPid = startWorkerProcess(GRID_ACTOR);
+      grid_ranks[i] = workerPid;
+    }
 
     //create squirrels
     int* squirrel_ranks = new int[squirrels+infect_squirrels];
@@ -64,7 +67,7 @@ int main(){
       squirrel_ranks[i] = workerPid;
     }
 
-    MasterActor m = MasterActor(grid_actor_rank, (squirrels+infect_squirrels), squirrel_ranks);
+    MasterActor m = MasterActor(grid_cells, grid_ranks, (squirrels+infect_squirrels), squirrel_ranks);
     a = &m;
     a->act();
   }

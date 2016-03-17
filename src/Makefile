@@ -21,7 +21,7 @@ clean:
 	rm -f *.o $(EXE)
 
 .cpp.o:
-	$(CXX) -c -I$(SQURL_DIR) -o $(notdir $@) $<
+	$(CXX) -c -I$(SQURL_DIR) -I$(PROC_POOL_DIR) -o $(notdir $@) $<
 
 .c.o:
 	$(CXX) -c -o $(notdir $@) $<
