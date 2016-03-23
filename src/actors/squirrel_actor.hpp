@@ -2,7 +2,6 @@
 #define SQUIRREL_H
 
 #include "actor.hpp"
-#include <vector>
 
 class SquirrelActor: public Actor
 {
@@ -15,7 +14,7 @@ private:
   int acting;
   int steps;
   int infected;
-  int infected_step; //step at which squirrel became infected 
+  int infected_step; //step at which squirrel became infected
   int N_grids;
   int* grid_ranks;
   float x,y;
@@ -27,8 +26,6 @@ private:
   void stepIntoCell();
   float averagePopInflux();
   float averageInfectionLevel();
-
-
 };
 
 #endif

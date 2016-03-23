@@ -1,7 +1,9 @@
 #include <iostream>
 #include <mpi.h>
+#include <unistd.h>
 
 #include "pool.h"
+#include "squirrel_const.h"
 #include "actor.hpp"
 #include "grid_actor.hpp"
 #include "master_actor.hpp"
@@ -12,29 +14,76 @@
 using namespace std;
 
 
+int main(){
+
+  int grids = 16;
+  int squirrels = 2;
+  int infect_squirrels = 1;
+
+  MPI_Init(NULL,NULL);
+  int statuscode = processPoolInit();
+
+  if(statuscode == 2){ //master - rank 0
+
+
+    int workerPid = startWorkerProcess();
+    int actor_code = MASTER_ACTOR;
+    MPI_Ssend(&actor_code,1,MPI_INT, workerPid,0, MPI_COMM_WORLD);
+
+    do{
+      //monitor workering/sleeping processes in background
+    }while(masterPoll());
+  }
+  /*
+   * Worker Code
+   */
+  else if(statuscode == 1){
+
+    do{
+      int actor_code;
+      MPI_Recv(&actor_code,1,MPI_INT, MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+
+      Actor *a;
+
+      if(actor_code == MASTER_ACTOR){
+        MasterActor m = MasterActor(3,grids,squirrels,4);
+        a = &m;
+        a->act();
+      }
+      else if(actor_code == GRID_ACTOR){
+        GridActor g = GridActor();
+        a = &g;
+        a->act();
+      }
+      else if(actor_code = SQUIRREL_ACTOR){
+        //cout << "spawned squirrel actor" << endl;
+        SquirrelActor s = SquirrelActor(0);
+        a = &s;
+        a->act();
+      }
+
+    }while(workerSleep());
+
+  }
+
+
+  processPoolFinalise();
+  MPI_Finalize();
+
+}
+
+
+
+
+
+
 /*
-  each process is inited as selected actor
-  squirrel sends its infected status to grid
-  grid sends back pop influx & infected level
-
- TODO:
-    birth squirrels
-    clock
-*/
-
-#define GRID_ACTOR 0
-#define SQUIRREL_ACTOR 1
-#define INFECTED_SQUIRREL_ACTOR 2
-
 int main(){
 
   int grid_cells = 16;
-  int squirrels = 8;
-  int infect_squirrels = 4;
+  int squirrels = 1;
+  int infect_squirrels = 0;
 
-  /*
-   * Create actors
-   */
 
   MPI_Init(NULL,NULL);
 
@@ -42,9 +91,7 @@ int main(){
 
   Actor *a;
 
-  /*
-   * Master Allocates actors
-   */
+
   if(statuscode == 2){
 
     //create grid cells
@@ -67,13 +114,11 @@ int main(){
       squirrel_ranks[i] = workerPid;
     }
 
-    MasterActor m = MasterActor(grid_cells, grid_ranks, (squirrels+infect_squirrels), squirrel_ranks);
+    MasterActor m = MasterActor(24,grid_cells, grid_ranks, (squirrels+infect_squirrels), squirrel_ranks);
     a = &m;
     a->act();
   }
-  /*
-   * Workers create themselves as actor type
-   */
+
   else if(statuscode == 1){ //worker
     int actor_type = getCommandData();
 
@@ -98,3 +143,4 @@ int main(){
   MPI_Finalize();
 
 }
+*/

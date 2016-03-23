@@ -111,10 +111,10 @@ int masterPoll() {
 /**
  * A worker or the master can instruct to start another worker process
  */
-int startWorkerProcess(int data) {
+int startWorkerProcess() {
 	if (PP_myRank == 0) {
 		PP_processesAwaitingStart++;
-		return startAwaitingProcessesIfNeeded(PP_processesAwaitingStart, data);
+		return startAwaitingProcessesIfNeeded(PP_processesAwaitingStart, 0);
 	} else {
 		int workerRank;
 		struct PP_Control_Package out_command = createCommandPackage(PP_STARTPROCESS);

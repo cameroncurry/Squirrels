@@ -2,14 +2,14 @@
 #include <iostream>
 #include <unistd.h>
 #include "pool.h"
+#include "squirrel_const.h"
 #include "grid_actor.hpp"
 
-
+using namespace std;
 
 GridActor::GridActor(){
-  //std::cout << "contructed grid on rank "<<rank<<std::endl;
   month = 0;
-  acting = 0;
+  waitingForMessages = 1;
 
   //initialise influx and infection level
   pop_influx[0] = 0;
@@ -20,9 +20,27 @@ GridActor::GridActor(){
 }
 
 void GridActor::act(){
+
+  //wait for squirrels or clock to send grid cell a message
+  while(waitingForMessages){
+    int flag;
+    MPI_Status status;
+    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
+
+    if(flag == 1){
+      if(status.MPI_SOURCE == 1){
+        handleMasterMessage();
+      }
+      else{
+        handleSqurrielMessage(status.MPI_SOURCE);
+      }
+
+    }
+  }
+  //cout << "grid "<<rank<<" shutdown"<<endl;
+  /*
   while(acting == 0){
-    //std::cout << "grid cell " << rank << " acting"<<std::endl;
-    usleep(10000);
+    //usleep(10000);
     int flag;
     MPI_Status status;
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
@@ -38,24 +56,8 @@ void GridActor::act(){
     }
 
     //acting = shouldWorkerStop();
-  }
-  //std::cout << "grid "<<rank<<" attempting to shutdown"<<std::endl;
-  //gridShutdown();
-  //workerSleep();
-  //std::cout << "grid "<<rank<<" successfully shutdown"<<std::endl;
-}
+  }*/
 
-void GridActor::handleMasterMessage(){
-  //master will only send null messages with tags
-  MPI_Status status;
-  MPI_Recv(NULL,0,MPI_INT, 0,MPI_ANY_TAG, MPI_COMM_WORLD,&status);
-  if(status.MPI_TAG == GRID_NEW_MONTH){
-    advanceMonth();
-  }
-  else if(status.MPI_TAG == GRID_SHUTDOWN){ //end of simultion, break out of recieve loop
-    //std::cout << "GRID "<<rank<<" SHUTDOWN" <<std::endl;
-    acting = 1;
-  }
 }
 
 void GridActor::advanceMonth(){
@@ -63,6 +65,19 @@ void GridActor::advanceMonth(){
   //reset influx and infection level for current month
   pop_influx[month%3] = 0;
   infect_level[month%2] = 0;
+}
+
+void GridActor::handleMasterMessage(){
+  //master will only send null messages with tags
+  MPI_Status status;
+  MPI_Recv(NULL,0,MPI_INT, 1,MPI_ANY_TAG, MPI_COMM_WORLD,&status);
+  if(status.MPI_TAG == GRID_NEW_MONTH){
+    advanceMonth();
+  }
+  else if(status.MPI_TAG == GRID_SHUTDOWN){ //end of simultion, break out of recieve loop
+    //std::cout << "GRID "<<rank<<" SHUTDOWN" <<std::endl;
+    waitingForMessages = 0;
+  }
 }
 
 void GridActor::handleSqurrielMessage(int source){
@@ -87,6 +102,7 @@ void GridActor::handleSqurrielMessage(int source){
  * handle these messages before shutting down to avoid deadlock
  * Might not need this keep here anyway
  */
+ /*
 void GridActor::gridShutdown(){
   int flag;
   do{
@@ -104,7 +120,7 @@ void GridActor::gridShutdown(){
     }
   }while(flag == 1);
 
-}
+}*/
 
 int GridActor::populationInflux(){
   return pop_influx[0]+pop_influx[1]+pop_influx[2];

@@ -1,9 +1,12 @@
 #include <mpi.h>
 #include "pool.h"
+#include "squirrel_const.h"
 #include "squirrel_actor.hpp"
 #include "squirrel-functions.h"
 #include <iostream>
 #include <unistd.h>
+
+using namespace std;
 
 SquirrelActor::SquirrelActor(int infected){
   this->infected =infected;
@@ -29,17 +32,36 @@ SquirrelActor::~SquirrelActor(){
 void SquirrelActor::waitForGridRanks(){
   //receive dynamic amount of grid cells
   MPI_Status status;
-  MPI_Probe(0,0,MPI_COMM_WORLD,&status);
+  MPI_Probe(1,0,MPI_COMM_WORLD,&status);
 
   MPI_Get_count(&status,MPI_INT,&N_grids);
   this->grid_ranks = new int[N_grids];
-  MPI_Recv(grid_ranks,N_grids,MPI_INT, 0,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
+  MPI_Recv(grid_ranks,N_grids,MPI_INT, 1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  std::cout << "squirrel created on rank " << rank<<std::endl;
 }
 
 void SquirrelActor::act(){
+  //cout << "hello from squirrel on rank "<<rank<<endl;
+
+  int count = 0;
 
 
+  int acting = shouldWorkerStop();
+  while(acting == 0){
+    //cout << "squirrel on rank "<<rank<<" squirreling"<<endl;
+    usleep(10000);
+    acting = shouldWorkerStop();
+    if(acting == 0){
+      stepIntoCell();
+      if(count == 10 && rank == 19){
+        cout << "squirrel "<<rank<<" dying"<<endl;
+        acting = 1;
+      }
+    }
+    count++;
+  }
+
+  /*
   while(acting == 0){
     //usleep(50000);
     //std::cout << "squirrel " << rank << " acting" << std::endl;
@@ -48,6 +70,7 @@ void SquirrelActor::act(){
     if(acting == 0){
       //step into next cell to update influx and infection level
       stepIntoCell();
+
 
       //after every step squirrel may catch disease
       if(steps > 0){
@@ -59,21 +82,39 @@ void SquirrelActor::act(){
         }
       }
 
+      if(rank == 18){
+        std::cout << "squirrel 18 dying "<<std::endl;
+        workerSleep();
+        std::cout << "squirrel 18 woken up"<<std::endl;
+      }
+
       if(infected == 1){ //if squirrel is infected, might die after minimum of 50 steps
         if(steps > infected_step+50){ //it has been 50 steps
             int die = willDie(&state);
+            std::cout<<"squirrel "<<rank<<"dying"<<std::endl;
         }
       }
 
       //after 50 timesteps, squirrel may give birth
       if(steps > 0 && steps%50 == 0){
+
+
         int birth = willGiveBirth(averagePopInflux(), &state);
-        //std::cout << "squirrel "<<rank<< " will give birth " << birth << std::endl;
+
+        if(birth == 1){
+          //std::cout << "squirrel "<<rank<< " giving birth at "<<x<<" "<<y << std::endl;
+          float location[2];
+          location[0] = x;
+          location[1] = y;
+          MPI_Send(location,2,MPI_FLOAT, 0,SQUIRREL_BIRTH_TAG, MPI_COMM_WORLD);
+        }
+
+
       }
       steps++;
     }
   }
-  //std::cout << "squirrel " << rank << " shutting down" << std::endl;
+  */
 }
 
 /*
