@@ -56,14 +56,15 @@ void SquirrelActor::act(){
     usleep(10000);
     acting = shouldWorkerStop();
     if(acting == 0){
+      //make one step
       stepIntoCell();
 
       //after every step squirrel may catch disease
-      if(steps > 0){
+      if(steps > 0 && infected == 0){
         int catchDisease = willCatchDisease(averageInfectionLevel(),&state);
         if(catchDisease == 1){
-          this->infected = 1;
-          this->infected_step = steps;
+          infected = 1;
+          infected_step = steps;
           //std::cout << "squirrel "<<rank<<" will catch disease"<<std::endl;
         }
       }
@@ -77,17 +78,21 @@ void SquirrelActor::act(){
               MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
               acting = 1;
             }
-
         }
       }
-
-      /*
-      if(steps == 10 && rank == 19){
-        cout << "squirrel "<<rank<<" dying"<<endl;
-        //send to master actor that squirrel is dying
-        MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
-        acting = 1;
-      }*/
+    }
+    if(acting == 0){ //squirrel may have died, in which case don't give birth the new squirrel
+      //after 50 timesteps, squirrel may give birth
+      //if(steps > 0 && steps%50 == 0){
+        int birth = willGiveBirth(averagePopInflux(), &state);
+        if(birth == 1){
+          std::cout << "squirrel "<<rank<< " giving birth at "<<x<<" "<<y << std::endl;
+          float location[2];
+          location[0] = x;
+          location[1] = y;
+          MPI_Send(location,2,MPI_FLOAT, 1,SQUIRREL_BIRTH, MPI_COMM_WORLD);
+        }
+      //}
     }
     steps++;
   }

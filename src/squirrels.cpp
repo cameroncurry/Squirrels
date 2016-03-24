@@ -16,6 +16,7 @@ using namespace std;
 
 int main(){
 
+  int months = 4;
   int grids = 16;
   int squirrels = 1;
   int infect_squirrels = 1;
@@ -47,7 +48,7 @@ int main(){
       Actor *a;
 
       if(actor_code == MASTER_ACTOR){
-        MasterActor m = MasterActor(3,grids,squirrels,infect_squirrels);
+        MasterActor m = MasterActor(months,grids,squirrels,infect_squirrels);
         a = &m;
         a->act();
       }

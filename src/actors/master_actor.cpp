@@ -60,6 +60,13 @@ void MasterActor::act(){
           N_squirrels--;
           cout << "master recieved that squirrel "<<status.MPI_SOURCE<<" died"<<endl;
         }
+        else if(status.MPI_TAG == SQUIRREL_BIRTH){
+          float location[2];
+          MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+          N_squirrels++;
+          cout << "master recieved that squirrel "<<status.MPI_SOURCE<<" is giving birth"<<endl;
+          createNewSquirrel(SQUIRREL_ACTOR);
+        }
       }
 
     }while(MPI_Wtime()-start_time < month_time);
@@ -68,51 +75,14 @@ void MasterActor::act(){
     //cout << "master ending month 0" << endl;
   }
 
-  //createNewSquirrel();
-  //sleep(1);
-
-
   cout << "master actor ending month, telling grid to shutdown"<<endl;
-
-  //shutdown effectively tells all squirrels to stop
+  //shutdown pool - effectively tells all squirrels to stop
   shutdownPool();
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
-
-  /*
-  //change to months
-  for(int i=0;i<4;i++){
-    std::cout<< "starting month "<<i<<std::endl;
-    double month_start_time = MPI_Wtime();
-
-    do{
-      MPI_Status status;
-      int flag;
-      MPI_Iprobe(MPI_ANY_SOURCE,SQUIRREL_BIRTH_TAG,MPI_COMM_WORLD,&flag,&status);
-      if(flag == 1){
-        createNewSquirrel(status.MPI_SOURCE);
-
-      }
-    }while(MPI_Wtime() - month_start_time < month_time);
-
-    //advanceMonth();
-  }
-  */
-  /*
-  //tell grid to shutdown
-  for(int i=0;i<N_grids;i++){
-    MPI_Send(NULL,0,MPI_INT, grid_ranks[i], GRID_SHUTDOWN, MPI_COMM_WORLD);
-  }
-
-  std::cout << " master finished counting months - exit" << std::endl;*/
 }
 
-void MasterActor::shutdownGridCells(){
-  for(int i=0;i<N_grids;i++){
-    //cout << "master shutting down grid "<<grid_ranks[i]<<endl;
-    MPI_Send(NULL,0,MPI_INT, grid_ranks[i], GRID_SHUTDOWN, MPI_COMM_WORLD);
-  }
-}
+
 
 void MasterActor::createNewSquirrel(int squirrel_type){
   //start process
@@ -129,5 +99,12 @@ void MasterActor::createNewSquirrel(int squirrel_type){
 void MasterActor::advanceMonth(){
   for(int i=0;i<N_grids;i++){
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i],GRID_NEW_MONTH, MPI_COMM_WORLD);
+  }
+}
+
+void MasterActor::shutdownGridCells(){
+  for(int i=0;i<N_grids;i++){
+    //cout << "master shutting down grid "<<grid_ranks[i]<<endl;
+    MPI_Send(NULL,0,MPI_INT, grid_ranks[i], GRID_SHUTDOWN, MPI_COMM_WORLD);
   }
 }
