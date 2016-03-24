@@ -21,7 +21,7 @@ GridActor::GridActor(){
 
 void GridActor::act(){
 
-  //wait for squirrels or clock to send grid cell a message
+  //wait for squirrels or master actor to send a message
   while(waitingForMessages){
     int flag;
     MPI_Status status;
@@ -37,31 +37,12 @@ void GridActor::act(){
 
     }
   }
-  //cout << "grid "<<rank<<" shutdown"<<endl;
-  /*
-  while(acting == 0){
-    //usleep(10000);
-    int flag;
-    MPI_Status status;
-    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
-
-    if(flag == 1){
-      //std::cout<<"grid rank "<<rank<<" received from "<<status.MPI_SOURCE<<std::endl;
-      if(status.MPI_SOURCE == 0){
-        handleMasterMessage();
-      }
-      else {
-        handleSqurrielMessage(status.MPI_SOURCE);
-      }
-    }
-
-    //acting = shouldWorkerStop();
-  }*/
 
 }
 
 void GridActor::advanceMonth(){
   month++;
+  cout << "grid "<<rank<<" advancing to month "<<month<<endl;
   //reset influx and infection level for current month
   pop_influx[month%3] = 0;
   infect_level[month%2] = 0;

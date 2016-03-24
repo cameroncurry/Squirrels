@@ -37,14 +37,18 @@ void SquirrelActor::waitForGridRanks(){
   MPI_Get_count(&status,MPI_INT,&N_grids);
   this->grid_ranks = new int[N_grids];
   MPI_Recv(grid_ranks,N_grids,MPI_INT, 1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  std::cout << "squirrel created on rank " << rank<<std::endl;
+
+  if(infected == 0){
+    cout << "squirrel created on rank " << rank<<endl;
+  }
+  else {
+    cout << "infected squirrel created on rank "<<rank<<endl;
+  }
+
 }
 
 void SquirrelActor::act(){
   //cout << "hello from squirrel on rank "<<rank<<endl;
-
-  int count = 0;
-
 
   int acting = shouldWorkerStop();
   while(acting == 0){
@@ -53,12 +57,39 @@ void SquirrelActor::act(){
     acting = shouldWorkerStop();
     if(acting == 0){
       stepIntoCell();
-      if(count == 10 && rank == 19){
-        cout << "squirrel "<<rank<<" dying"<<endl;
-        acting = 1;
+
+      //after every step squirrel may catch disease
+      if(steps > 0){
+        int catchDisease = willCatchDisease(averageInfectionLevel(),&state);
+        if(catchDisease == 1){
+          this->infected = 1;
+          this->infected_step = steps;
+          //std::cout << "squirrel "<<rank<<" will catch disease"<<std::endl;
+        }
       }
+
+      //if squirrel is infected, might die after minimum of 50 steps
+      if(infected == 1){
+        if(steps > infected_step+50){ //it has been 50 steps
+            int die = willDie(&state);
+            if(die == 1){
+              std::cout<<"squirrel "<<rank<<" dying"<<std::endl;
+              MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
+              acting = 1;
+            }
+
+        }
+      }
+
+      /*
+      if(steps == 10 && rank == 19){
+        cout << "squirrel "<<rank<<" dying"<<endl;
+        //send to master actor that squirrel is dying
+        MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
+        acting = 1;
+      }*/
     }
-    count++;
+    steps++;
   }
 
   /*
@@ -126,7 +157,7 @@ void SquirrelActor::stepIntoCell(){
   //then receive back pop influx and infection level
   squirrelStep(x,y,&x,&y,&state);
   int cell = getCellFromPosition(x,y);
-  //std::cout <<"squirrel "<<rank<<" stepped into cell "<<cell<<" sending to "<<grid_ranks[cell]<<std::endl;
+  //std::cout <<"squirrel "<<rank<<" stepped into cell "<<cell<<std::endl;
   MPI_Ssend(&infected,1, MPI_INT, grid_ranks[cell], cell, MPI_COMM_WORLD);
 
   int cellValues[2];

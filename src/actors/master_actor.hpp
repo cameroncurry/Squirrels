@@ -11,15 +11,15 @@ public:
   void act();
 private:
   int months;
-
-  int N_grids;
+  double month_time; //in seconds
   int N_squirrels;
-
+  int N_grids;
   int* grid_ranks;
 
 
   void shutdownGridCells();
-  void createNewSquirrel();
+  void createNewSquirrel(int squirrel_type);
+  void advanceMonth();
 
 
   /*

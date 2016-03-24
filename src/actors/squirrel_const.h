@@ -8,6 +8,8 @@
 
 #define GRID_SHUTDOWN 104
 #define GRID_NEW_MONTH 105
-#define SQUIRREL_BIRTH_TAG 106
+
+#define SQUIRREL_BIRTH 106
+#define SQUIRREL_DEATH 107
 
 #endif

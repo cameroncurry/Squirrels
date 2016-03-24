@@ -17,7 +17,7 @@ using namespace std;
 int main(){
 
   int grids = 16;
-  int squirrels = 2;
+  int squirrels = 1;
   int infect_squirrels = 1;
 
   MPI_Init(NULL,NULL);
@@ -39,6 +39,7 @@ int main(){
    */
   else if(statuscode == 1){
 
+
     do{
       int actor_code;
       MPI_Recv(&actor_code,1,MPI_INT, MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
@@ -46,7 +47,7 @@ int main(){
       Actor *a;
 
       if(actor_code == MASTER_ACTOR){
-        MasterActor m = MasterActor(3,grids,squirrels,4);
+        MasterActor m = MasterActor(3,grids,squirrels,infect_squirrels);
         a = &m;
         a->act();
       }
@@ -55,9 +56,13 @@ int main(){
         a = &g;
         a->act();
       }
-      else if(actor_code = SQUIRREL_ACTOR){
-        //cout << "spawned squirrel actor" << endl;
+      else if(actor_code == SQUIRREL_ACTOR){
         SquirrelActor s = SquirrelActor(0);
+        a = &s;
+        a->act();
+      }
+      else if(actor_code == INFECTED_SQUIRREL_ACTOR){
+        SquirrelActor s = SquirrelActor(1);
         a = &s;
         a->act();
       }
