@@ -20,7 +20,7 @@ private:
 
   void shutdownGridCells();
   void createNewSquirrel(int squirrel_type);
-  void advanceMonth();
+  void advanceMonth(int month);
   void checkSquirrels();
 
 

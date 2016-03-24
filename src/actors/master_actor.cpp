@@ -11,7 +11,7 @@ using namespace std;
 
 MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirrels, int max_squirrels){
   this->months = months;
-  this->month_time = 0.5; //real time seconds
+  this->month_time = 1.0; //real time seconds
   this->N_grids = grids;
   this->N_squirrels = 0;
   this->max_squirrels = max_squirrels;
@@ -48,7 +48,7 @@ void MasterActor::act(){
 
 
   for(int i=0;i<months;i++){
-    cout << "master starting month "<<i << endl;
+    //cout << "master starting month "<<i << endl;
     double start_time = MPI_Wtime();
     do{
 
@@ -69,7 +69,7 @@ void MasterActor::act(){
       }
 
     }while(MPI_Wtime()-start_time < month_time); //end month
-
+    advanceMonth(i);
   }
 
   cout << "master actor ending month, telling grid to shutdown"<<endl;
@@ -99,9 +99,13 @@ void MasterActor::createNewSquirrel(int squirrel_type){
 }
 
 //tell grid cells to move to next month
-void MasterActor::advanceMonth(){
+void MasterActor::advanceMonth(int month){
+  cout << "For month "<<month<<" population influx & infection level are:"<<endl;
   for(int i=0;i<N_grids;i++){
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i],GRID_NEW_MONTH, MPI_COMM_WORLD);
+    int grid_data[2];
+    MPI_Recv(grid_data,2,MPI_INT, grid_ranks[i],0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    cout<< "Grid: "<<i<<" influx: "<<grid_data[0]<<" infection: "<<grid_data[1]<<endl;
   }
 }
 

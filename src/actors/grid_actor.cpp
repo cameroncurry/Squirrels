@@ -44,8 +44,13 @@ void GridActor::act(){
 }
 
 void GridActor::advanceMonth(){
+  //send master grid data
+  int data[2];
+  data[0] = pop_influx[month%3];
+  data[1] = infect_level[month%2];
+  MPI_Send(data,2,MPI_INT, 1,0, MPI_COMM_WORLD);
+
   month++;
-  cout << "grid "<<rank<<" advancing to month "<<month<<endl;
   //reset influx and infection level for current month
   pop_influx[month%3] = 0;
   infect_level[month%2] = 0;
