@@ -6,13 +6,14 @@
 class MasterActor: public Actor
 {
 public:
-  MasterActor(int months, int grids, int squirrels, int infect_squirrels);
+  MasterActor(int months, int grids, int squirrels, int infect_squirrels,int max_squirrels);
   ~MasterActor();
   void act();
 private:
   int months;
   double month_time; //in seconds
   int N_squirrels;
+  int max_squirrels;
   int N_grids;
   int* grid_ranks;
 
@@ -20,6 +21,7 @@ private:
   void shutdownGridCells();
   void createNewSquirrel(int squirrel_type);
   void advanceMonth();
+  void checkSquirrels();
 
 
   /*

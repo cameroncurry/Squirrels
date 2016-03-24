@@ -38,6 +38,9 @@ void GridActor::act(){
     }
   }
 
+  //cout << "grid "<<rank<<"shutting down"<<endl;
+  gridShutdown();
+
 }
 
 void GridActor::advanceMonth(){
@@ -83,7 +86,6 @@ void GridActor::handleSqurrielMessage(int source){
  * handle these messages before shutting down to avoid deadlock
  * Might not need this keep here anyway
  */
- /*
 void GridActor::gridShutdown(){
   int flag;
   do{
@@ -91,7 +93,7 @@ void GridActor::gridShutdown(){
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
     if(flag == 1){
       if(status.MPI_SOURCE != 0){
-        //std::cout << "grid "<<rank<<" shutting down with flag "<<flag<<" from source " << status.MPI_SOURCE<<std::endl;
+        std::cout << "grid "<<rank<<" shutting down with flag "<<flag<<" from source " << status.MPI_SOURCE<<std::endl;
         handleSqurrielMessage(status.MPI_SOURCE);
       }
       else {
@@ -100,8 +102,7 @@ void GridActor::gridShutdown(){
       }
     }
   }while(flag == 1);
-
-}*/
+}
 
 int GridActor::populationInflux(){
   return pop_influx[0]+pop_influx[1]+pop_influx[2];

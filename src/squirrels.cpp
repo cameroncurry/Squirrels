@@ -18,8 +18,9 @@ int main(){
 
   int months = 4;
   int grids = 16;
-  int squirrels = 1;
+  int squirrels = 2;
   int infect_squirrels = 1;
+  int max_squirrels = 10;
 
   MPI_Init(NULL,NULL);
   int statuscode = processPoolInit();
@@ -48,7 +49,7 @@ int main(){
       Actor *a;
 
       if(actor_code == MASTER_ACTOR){
-        MasterActor m = MasterActor(months,grids,squirrels,infect_squirrels);
+        MasterActor m = MasterActor(months,grids,squirrels,infect_squirrels,max_squirrels);
         a = &m;
         a->act();
       }
