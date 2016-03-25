@@ -114,9 +114,20 @@ void GridActor::gridShutdown(){
   }while(flag == 1);
 }
 
+
 int GridActor::populationInflux(){
-  return pop_influx[0]+pop_influx[1]+pop_influx[2];
+  if(month == 0)return 0;
+  else if(month == 1)return pop_influx[0];
+  else if(month == 2)return pop_influx[0]+pop_influx[1];
+  else{
+    return pop_influx[0]+pop_influx[1]+pop_influx[2];
+  }
 }
+
 int GridActor::infectionLevel(){
-  return infect_level[0]+infect_level[1];
+  if(month == 0)return 0;
+  else if(month == 1)return infect_level[0];
+  else{
+    return infect_level[0]+infect_level[1];
+  }
 }

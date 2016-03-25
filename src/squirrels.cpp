@@ -18,8 +18,8 @@ int main(){
   int months = 4;
   int grids = 16;
   int squirrels = 5;
-  int infect_squirrels = 1;
-  int max_squirrels = 10;
+  int infect_squirrels = 4;
+  int max_squirrels = 20;
 
   MPI_Init(NULL,NULL);
   int statuscode = processPoolInit();

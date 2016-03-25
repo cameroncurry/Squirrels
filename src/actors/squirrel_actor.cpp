@@ -79,6 +79,7 @@ void SquirrelActor::act(){
         if(catchDisease == 1){
           infected = 1;
           infected_step = steps;
+          MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
           //std::cout << "squirrel "<<rank<<" will catch disease"<<std::endl;
         }
       }

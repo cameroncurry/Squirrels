@@ -65,7 +65,11 @@ void MasterActor::act(){
       MPI_Status status;
       MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
       if(flag == 1){
-        if(status.MPI_TAG == SQUIRREL_DEATH){
+        if(status.MPI_TAG == SQUIRREL_INFECTED){
+          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+          N_infected++;
+        }
+        else if(status.MPI_TAG == SQUIRREL_DEATH){
           MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
           N_squirrels--;
           N_infected--; //dead squirrel must be infected, so decrement count
@@ -89,7 +93,7 @@ void MasterActor::act(){
 
     }while(MPI_Wtime()-start_time < month_time); //end month
     if(i==-1)break;
-    
+
     advanceMonth(i);
   }
 
