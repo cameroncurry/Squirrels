@@ -42,9 +42,10 @@ void GridActor::act(){
   }
 
   //cout << "grid "<<rank<<"shutting down"<<endl;
+  //int flag;
+  //MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,MPI_STATUS_IGNORE);
   gridShutdown();
-  int flag;
-  MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,MPI_STATUS_IGNORE);
+  
   printf("grid %d finished with flag %d\n",rank,flag);
   if(SQURL_LOG)printf("INIT - Grid actor on rank %d shutting down\n",rank);
 }

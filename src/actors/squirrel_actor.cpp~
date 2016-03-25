@@ -62,18 +62,17 @@ void SquirrelActor::waitForGridRanks(){
 }
 
 void SquirrelActor::act(){
+  //cout << "hello from squirrel on rank "<<rank<<endl;
 
-  //to prevent dead lock, should worker stop is called before every message sending operation
   int acting = shouldWorkerStop();
   while(acting == 0){
     //cout << "squirrel on rank "<<rank<<" squirreling"<<endl;
     usleep(10000);
-
     acting = shouldWorkerStop();
     if(acting == 0){
       //make one step
       stepIntoCell();
-    }
+
       //after every step squirrel may catch disease
       if(steps > 0 && infected == 0){
         int catchDisease = willCatchDisease(averageInfectionLevel(),&state);
