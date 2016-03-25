@@ -13,7 +13,11 @@ $./run n-proc
 eg. ./run 64
 
 ##Verbose Output
-Verbose output is possible using ```SQURL_LOG``` variable in squirrel_const.h within actors directory.
+Verbose output is possible using `SQURL_LOG` variable in squirrel_const.h within actors directory.
 
 Turn on verbose output with: ```#define SQURL_LOG 1```
 Turn off: ```#define SQURL_LOG 0```
+
+Verbose output is "grepable", redirect standard output to a file of your choice
+
+To see actors starting up and shutting down, grep for "INIT"
