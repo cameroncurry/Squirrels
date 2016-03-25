@@ -28,5 +28,5 @@ To grep verbose output, redirect standard output to a file of your choice:
 $ ./run n-procs > squrl.log
 ```
 
-To see actors starting up and shutting down, grep for "INIT"
-  `$ cat squrl.log | grep INIT`
+To see actors starting up and shutting down, grep for "INIT":
+`$ cat squrl.log | grep INIT`

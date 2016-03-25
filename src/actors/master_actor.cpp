@@ -42,6 +42,7 @@ MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirr
   //initialise infected squirrel actors
   for(int i=0;i<infect_squirrels;i++){
     int workerPid = createNewSquirrel(INFECTED_SQUIRREL_ACTOR);
+    N_infected++;
     if(SQURL_LOG)printf("INIT - Master actor created infected squirrel actor on rank %d\n",workerPid);
   }
 
@@ -51,11 +52,9 @@ MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirr
 
 MasterActor::~MasterActor(){
   delete[] grid_ranks;
-  //delete[] squirrel_ranks;
 }
 
 void MasterActor::act(){
-
 
   for(int i=0;i<months;i++){
     //cout << "master starting month "<<i << endl;
@@ -80,13 +79,17 @@ void MasterActor::act(){
           if(newSqurlID != -1){ //birth was successful, send parent's coordinates
             MPI_Send(location,2,MPI_FLOAT, newSqurlID,SQUIRREL_BIRTH, MPI_COMM_WORLD);
           }
-          else{ //not successful - kill simulation TODO
-
+          else{ //not successful - kill simulation
+            printf("Maximum Number of Squirrels Reached: %d, ending simulation\n",N_squirrels);
+            i = -1;
+            break;
           }
         }
       }
 
     }while(MPI_Wtime()-start_time < month_time); //end month
+    if(i==-1)break;
+    
     advanceMonth(i);
   }
 
@@ -118,7 +121,7 @@ int MasterActor::createNewSquirrel(int squirrel_type){
     return workerPid;
   }
   else {
-    cout << "too many squirrels"<<endl;
+    printf("Too many squrriels\n");
     return -1;
   }
 
@@ -126,10 +129,10 @@ int MasterActor::createNewSquirrel(int squirrel_type){
 
 //tell grid cells to move to next month
 void MasterActor::advanceMonth(int month){
+
   printf("After month %d:\nLive Squirrels: %d\nOf which are infected:%d\n",month,N_squirrels,N_infected);
   printf("Population infelux & Infection level for grid cells are:\n");
-  //cout << "At the end of month "<<month<<"\nThere are "<<N_squirrels<<" squirrels, of which "<<N_infected<<" are infected"<<endl;
-  //cout<<"Population influx & Infection level are:"<<endl;
+
   for(int i=0;i<N_grids;i++){
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i],GRID_NEW_MONTH, MPI_COMM_WORLD);
     int grid_data[2];
