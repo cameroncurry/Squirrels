@@ -13,4 +13,7 @@
 #define SQUIRREL_BIRTH 107
 #define SQUIRREL_DEATH 108
 
+//print debug information to log file
+#define SQURL_LOG 1
+
 #endif

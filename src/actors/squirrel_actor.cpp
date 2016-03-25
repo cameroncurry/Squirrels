@@ -15,13 +15,16 @@ SquirrelActor::SquirrelActor(int infected){
   contruct();
 }
 SquirrelActor::SquirrelActor(int infected,float x,float y){
-  this->infected - infected;
+  this->infected = infected;
   this->x = x;
   this->y = y;
   contruct();
 }
 
 void SquirrelActor::contruct(){
+
+  if(SQURL_LOG)printf("INIT - Squirrel actor created on rank %d\n",rank);
+
   this->steps = 0;
   this->state = -1-rank;
   this->acting = 0;
@@ -109,7 +112,9 @@ void SquirrelActor::act(){
     steps++;
   }
 
-  cout << "squirrel "<<rank<<" shutting down"<<endl;
+
+  if(SQURL_LOG)printf("INIT - Squirrel actor on rank %d shutting down\n",rank);
+
 }
 
 /*

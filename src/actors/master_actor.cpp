@@ -1,15 +1,20 @@
 #include <mpi.h>
-#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
 #include "pool.h"
 #include "squirrel_const.h"
 #include "master_actor.hpp"
-#include <stdio.h>
-#include <iostream>
 
 using namespace std;
 
 
 MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirrels, int max_squirrels){
+
+  if(SQURL_LOG)printf("INIT - Master actor created on rank %d\n",rank);
+
+
   this->months = months;
   this->month_time = 1.0; //real time seconds
   this->N_grids = grids;
@@ -25,15 +30,19 @@ MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirr
     grid_ranks[i] = workerPid;
     int actor_code = GRID_ACTOR;
     MPI_Ssend(&actor_code,1,MPI_INT, workerPid,0, MPI_COMM_WORLD);
+
+    if(SQURL_LOG)printf("INIT - Master actor created grid actor on rank %d\n",workerPid);
   }
 
   //initialise squirrel actors
   for(int i=0;i<squirrels;i++){
-    createNewSquirrel(SQUIRREL_ACTOR);
+    int workerPid = createNewSquirrel(SQUIRREL_ACTOR);
+    if(SQURL_LOG)printf("INIT - Master actor created squirrel actor on rank %d\n",workerPid);
   }
   //initialise infected squirrel actors
   for(int i=0;i<infect_squirrels;i++){
-    createNewSquirrel(INFECTED_SQUIRREL_ACTOR);
+    int workerPid = createNewSquirrel(INFECTED_SQUIRREL_ACTOR);
+    if(SQURL_LOG)printf("INIT - Master actor created infected squirrel actor on rank %d\n",workerPid);
   }
 
 
@@ -87,6 +96,8 @@ void MasterActor::act(){
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
   //checkSquirrels();
+
+  if(SQURL_LOG){printf("INIT - Master actor on rank %d shutting down\n",rank);}
 }
 
 

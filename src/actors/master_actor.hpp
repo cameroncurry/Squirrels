@@ -18,7 +18,6 @@ private:
   int N_grids;
   int* grid_ranks;
 
-
   void shutdownGridCells();
   int createNewSquirrel(int squirrel_type);
   void advanceMonth(int month);

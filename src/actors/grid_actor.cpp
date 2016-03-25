@@ -8,6 +8,9 @@
 using namespace std;
 
 GridActor::GridActor(){
+
+  if(SQURL_LOG)printf("INIT - Grid actor created on rank %d\n",rank);
+
   month = 0;
   waitingForMessages = 1;
 
@@ -39,8 +42,9 @@ void GridActor::act(){
   }
 
   //cout << "grid "<<rank<<"shutting down"<<endl;
-  gridShutdown();
+  //gridShutdown();
 
+  if(SQURL_LOG)printf("INIT - Grid actor on rank %d shutting down\n",rank);
 }
 
 void GridActor::advanceMonth(){

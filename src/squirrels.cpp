@@ -1,6 +1,5 @@
 #include <iostream>
 #include <mpi.h>
-#include <unistd.h>
 
 #include "pool.h"
 #include "squirrel_const.h"

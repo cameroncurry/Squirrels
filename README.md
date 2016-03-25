@@ -1,2 +1,19 @@
 # Squirrels
-Parallel Design Patterns Coursework: Implement squirrel model with Actor Pattern
+Parallel Design Patterns Coursework: Implementation of squirrel model using the Actor Pattern
+
+##Compile
+Compile using Makefile in src directory (requires mpic++):
+$make
+
+##Run
+Run simulation with the run script which argument of number of mpi processes:
+```
+$./run n-proc   
+```
+eg. ./run 64
+
+##Verbose Output
+Verbose output is possible using ```SQURL_LOG``` variable in squirrel_const.h within actors directory.
+
+Turn on verbose output with: ```#define SQURL_LOG 1```
+Turn off: ```#define SQURL_LOG 0```
