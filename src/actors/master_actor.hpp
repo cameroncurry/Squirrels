@@ -21,7 +21,7 @@ private:
   void shutdownGridCells();
   void createNewSquirrel(int squirrel_type);
   void advanceMonth(int month);
-  void checkSquirrels();
+  //void checkSquirrels();
 
 
   /*

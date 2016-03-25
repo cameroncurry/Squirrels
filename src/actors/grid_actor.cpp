@@ -91,6 +91,7 @@ void GridActor::handleSqurrielMessage(int source){
  * handle these messages before shutting down to avoid deadlock
  * Might not need this keep here anyway
  */
+
 void GridActor::gridShutdown(){
   int flag;
   do{

@@ -77,7 +77,7 @@ void MasterActor::act(){
   shutdownPool();
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
-  checkSquirrels();
+  //checkSquirrels();
 }
 
 
@@ -116,7 +116,9 @@ void MasterActor::shutdownGridCells(){
   }
 }
 
+/*
 void MasterActor::checkSquirrels(){
+
   int flag;
   MPI_Status status;
   MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_SOURCE,MPI_COMM_WORLD,&flag,&status);
@@ -128,4 +130,4 @@ void MasterActor::checkSquirrels(){
     cout << "no squirrels waiting for master "<<endl;
   }
 
-}
+}*/
