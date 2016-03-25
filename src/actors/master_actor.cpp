@@ -73,7 +73,11 @@ void MasterActor::act(){
           MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
           N_squirrels--;
           N_infected--; //dead squirrel must be infected, so decrement count
-          //cout << "master recieved that squirrel "<<status.MPI_SOURCE<<" died"<<endl;
+          if(N_squirrels <= 0){
+            printf("All squrriels have died, ending simulation\n");
+            i = -1;
+            break;
+          }
         }
         else if(status.MPI_TAG == SQUIRREL_BIRTH){
           float location[2];
