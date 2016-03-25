@@ -43,34 +43,37 @@ void GridActor::act(){
 
   //cout << "grid "<<rank<<"shutting down"<<endl;
   //gridShutdown();
-
+  int flag;
+  MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,MPI_STATUS_IGNORE);
+  printf("grid %d finished with flag %d\n",rank,flag);
   if(SQURL_LOG)printf("INIT - Grid actor on rank %d shutting down\n",rank);
 }
 
-void GridActor::advanceMonth(){
-  //send master grid data
-  int data[2];
-  data[0] = pop_influx[month%3];
-  data[1] = infect_level[month%2];
-  MPI_Send(data,2,MPI_INT, 1,0, MPI_COMM_WORLD);
-
-  month++;
-  //reset influx and infection level for current month
-  pop_influx[month%3] = 0;
-  infect_level[month%2] = 0;
-}
-
 void GridActor::handleMasterMessage(){
-  //master will only send null messages with tags
   MPI_Status status;
   MPI_Recv(NULL,0,MPI_INT, 1,MPI_ANY_TAG, MPI_COMM_WORLD,&status);
   if(status.MPI_TAG == GRID_NEW_MONTH){
     advanceMonth();
+    if(SQURL_LOG)printf("COMM - Grid actor on rank %d received advance month message from master actor\n",rank);
   }
-  else if(status.MPI_TAG == GRID_SHUTDOWN){ //end of simultion, break out of recieve loop
-    //std::cout << "GRID "<<rank<<" SHUTDOWN" <<std::endl;
+  else if(status.MPI_TAG == GRID_SHUTDOWN){
     waitingForMessages = 0;
+    if(SQURL_LOG)printf("COMM - Grid actor on rank %d received shutdown message from master actor\n",rank);
   }
+}
+
+void GridActor::advanceMonth(){
+  //send back to master influx and infect level for output
+  int data[2];
+  data[0] = pop_influx[month%3];
+  data[1] = infect_level[month%2];
+  MPI_Send(data,2,MPI_INT, 1,0, MPI_COMM_WORLD);
+  if(SQURL_LOG)printf("COMM - Grid actor on rank %d sent %d %d to master actor\n",rank,data[0],data[1]);
+
+  //reset influx and infection level for current month
+  month++;
+  pop_influx[month%3] = 0;
+  infect_level[month%2] = 0;
 }
 
 void GridActor::handleSqurrielMessage(int source){
