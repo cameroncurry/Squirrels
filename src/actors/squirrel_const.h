@@ -13,6 +13,7 @@
 #define SQUIRREL_BIRTH 107
 #define SQUIRREL_DEATH 108
 #define SQUIRREL_INFECTED 109
+#define SQUIRREL_ENDING 110
 
 //verbose output
 #define SQURL_LOG 0

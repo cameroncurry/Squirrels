@@ -9,7 +9,7 @@
 using namespace std;
 
 SquirrelActor::SquirrelActor(int infected){
-  this->infected =infected;
+  this->infected = infected;
   this->x=0.0;
   this->y=0.0;
   contruct();
@@ -73,7 +73,7 @@ void SquirrelActor::act(){
     if(acting == 0){
       //make one step
       stepIntoCell();
-    }
+
       //after every step squirrel may catch disease
       if(steps > 0 && infected == 0){
         int catchDisease = willCatchDisease(averageInfectionLevel(),&state);
@@ -92,13 +92,12 @@ void SquirrelActor::act(){
             if(die == 1){
               std::cout<<"squirrel "<<rank<<" dying"<<std::endl;
               MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
-              acting = 1;
+              //acting = 1;
+              break;
             }
         }
       }
-    }
 
-    if(acting == 0){ //squirrel may have died, in which case don't give birth the new squirrel
       //after 50 timesteps, squirrel may give birth
       if(steps > 0 && steps%50 == 0){
         int birth = willGiveBirth(averagePopInflux(), &state);
@@ -110,8 +109,13 @@ void SquirrelActor::act(){
           MPI_Send(location,2,MPI_FLOAT, 1,SQUIRREL_BIRTH, MPI_COMM_WORLD);
         }
       }
+      steps++;
     }
-    steps++;
+    else {
+      printf("squirrel %d stopping\n",rank);
+      MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_ENDING, MPI_COMM_WORLD);
+    }
+
   }
 
 
@@ -137,7 +141,6 @@ void SquirrelActor::stepIntoCell(){
 
   pop_influxes[steps%50] = cellValues[0];
   infect_levels[steps%50] = cellValues[1];
-
 }
 
 float SquirrelActor::averagePopInflux(){

@@ -100,6 +100,11 @@ void MasterActor::act(){
   //cout << "master actor ending simulation, telling grid to shutdown"<<endl;
   //shutdown pool - effectively tells all squirrels to stop through process pool code
   shutdownPool();
+
+  for(int i=0;i<N_squirrels;i++){
+    MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  }
+
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
   //checkSquirrels();
@@ -135,7 +140,7 @@ int MasterActor::createNewSquirrel(int squirrel_type){
 void MasterActor::advanceMonth(int month){
 
   printf("After month %d:\nLive Squirrels: %d\nOf which are infected:%d\n",month,N_squirrels,N_infected);
-  printf("Population infelux & Infection level for grid cells are:\n");
+  printf("Population influx & Infection level for grid cells are:\n");
 
   for(int i=0;i<N_grids;i++){
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i],GRID_NEW_MONTH, MPI_COMM_WORLD);
