@@ -3,12 +3,14 @@ Parallel Design Patterns Coursework: Implementation of squirrel model using the 
 
 ##Compile
 Compile using Makefile in src directory (requires mpic++):
-$make
+```
+$ make
+```
 
 ##Run
 Run simulation with the run script which argument of number of mpi processes:
 ```
-$./run n-proc   
+$ ./run n-proc   
 ```
 eg. ./run 64
 
