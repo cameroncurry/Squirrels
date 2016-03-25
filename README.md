@@ -10,7 +10,7 @@ $ make
 ##Run
 Run simulation with the run script which argument of number of mpi processes:
 ```
-$ ./run n-proc   
+$ ./run n-procs  
 ```
 eg. ./run 64
 
@@ -20,6 +20,8 @@ Verbose output is possible using `SQURL_LOG` variable in squirrel_const.h within
 Turn on verbose output with: ```#define SQURL_LOG 1```
 Turn off: ```#define SQURL_LOG 0```
 
-Verbose output is "grepable", redirect standard output to a file of your choice
+Verbose output is "grepable"
+
+To grep verbose output, redirect standard output to a file of your choice
 
 To see actors starting up and shutting down, grep for "INIT"
