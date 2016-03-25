@@ -7,6 +7,7 @@ class SquirrelActor: public Actor
 {
 public:
   SquirrelActor(int infected);
+  SquirrelActor(int infected,float x,float y);
   ~SquirrelActor();
   void act();
 private:
@@ -22,6 +23,7 @@ private:
   int pop_influxes[50];
   int infect_levels[50];
 
+  void contruct();
   void waitForGridRanks();
   void stepIntoCell();
   float averagePopInflux();

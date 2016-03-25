@@ -13,13 +13,14 @@ private:
   int months;
   double month_time; //in seconds
   int N_squirrels;
+  int N_infected;
   int max_squirrels;
   int N_grids;
   int* grid_ranks;
 
 
   void shutdownGridCells();
-  void createNewSquirrel(int squirrel_type);
+  int createNewSquirrel(int squirrel_type);
   void advanceMonth(int month);
   //void checkSquirrels();
 

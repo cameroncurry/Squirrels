@@ -69,6 +69,16 @@ int main(){
         a = &s;
         a->act();
       }
+      else if(actor_code == NEWBORN_SQUIRREL_ACTOR){
+        //newborn squirrel will recieve its coordinates
+        float location[2];
+        MPI_Recv(location,2,MPI_FLOAT, 1,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        cout << "new being born at "<<location[0]<<" "<<location[1]<<endl;
+        //cout << "new being born"<<endl;
+        SquirrelActor s = SquirrelActor(0,location[0],location[1]);
+        a = &s;
+        a->act();
+      }
 
     }while(workerSleep());
 

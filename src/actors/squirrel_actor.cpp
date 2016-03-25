@@ -10,11 +10,21 @@ using namespace std;
 
 SquirrelActor::SquirrelActor(int infected){
   this->infected =infected;
+  this->x=0.0;
+  this->y=0.0;
+  contruct();
+}
+SquirrelActor::SquirrelActor(int infected,float x,float y){
+  this->infected - infected;
+  this->x = x;
+  this->y = y;
+  contruct();
+}
+
+void SquirrelActor::contruct(){
   this->steps = 0;
   this->state = -1-rank;
   this->acting = 0;
-  this->x=0.0;
-  this->y=0.0;
 
   for(int i=0;i<50;i++){
     pop_influxes[i] = 0;
@@ -38,12 +48,13 @@ void SquirrelActor::waitForGridRanks(){
   this->grid_ranks = new int[N_grids];
   MPI_Recv(grid_ranks,N_grids,MPI_INT, 1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+  /*
   if(infected == 0){
     cout << "squirrel created on rank " << rank<<endl;
   }
   else {
     cout << "infected squirrel created on rank "<<rank<<endl;
-  }
+  }*/
 
 }
 
@@ -68,7 +79,7 @@ void SquirrelActor::act(){
           //std::cout << "squirrel "<<rank<<" will catch disease"<<std::endl;
         }
       }
-    
+
       //if squirrel is infected, might die after minimum of 50 steps
       if(infected == 1){
         if(steps > infected_step+50){ //it has been 50 steps
