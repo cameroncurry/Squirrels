@@ -90,55 +90,16 @@ void MasterActor::act(){
     advanceMonth(i);
   }
 
-  //shutdown process pool
-  //squirrels may still be in flight so keep handling squirrel messages
+  //shutdown process pool - effectively tells squirels to stop
   shutdownPool();
 
-
-  MPI_Request request[N_squirrels];
-  MPI_Status status[N_squirrels];
+  //wait until all squirrels have stopped before stopping grid cells
   for(int i=0;i<N_squirrels;i++){
-    MPI_Irecv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, &request[i]);
+    MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
-
-
-  while(1){
-    int requests_outstanding = 0;
-
-    for(int i=0;i<N_squirrels;i++){
-      int flag;
-      MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
-      if(!flag) requests_outstanding = 1;
-    }
-
-    if(requests_outstanding == 0){
-      break;
-    }
-    else{
-      int flag;
-      MPI_Status status;
-      MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
-      if(flag == 1){
-        if(status.MPI_TAG == SQUIRREL_INFECTED){
-          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        }
-        else if(status.MPI_TAG == SQUIRREL_DEATH){
-          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        }
-        else if(status.MPI_TAG == SQUIRREL_BIRTH){
-          float location[2];
-          MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        }
-      }
-    }
-  }
-
-  //MPI_Waitall(N_squirrels,request,status);
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
-
-
   if(SQURL_LOG){printf("INIT - Master actor on rank %d shutting down\n",rank);}
 }
 
@@ -214,50 +175,9 @@ void MasterActor::advanceMonth(int month){
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i],GRID_NEW_MONTH, MPI_COMM_WORLD);
     int grid_data[2];
     MPI_Recv(grid_data,2,MPI_INT, grid_ranks[i],0, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-    //cout<< "Grid: "<<i<<" influx: "<<grid_data[0]<<" infection: "<<grid_data[1]<<endl;
+
     printf("Grid %d influx: %d, infection level: %d\n",i,grid_data[0],grid_data[1]);
   }
-}
-
-void MasterActor::endSimulation(){
-  //shutdown process pool - effectively tells all squirrels that they should stop
-  shutdownPool();
-
-  //squirrel may still be in flight, post non blocking recieve for each squirrel still alive
-  //MPI_Request requests[N_squirrels];
-  //MPI_Status statuses[N_squirrels];
-  printf("rank 1 waiting for squirrels\n");
-  for(int i=0;i<N_squirrels;i++){
-    MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-
-  /*
-  while(testall(N_squirrels,requests) != 0){
-    int flag;
-    MPI_Status status;
-    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&flag,&status);
-    //printf("probing squirrel");
-    if(flag == 1){
-      //printf("squirrel probed\n");
-    if(status.MPI_TAG == SQUIRREL_INFECTED){
-      MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-      //handleSquirrelInfected(status.MPI_SOURCE);
-    }
-    else if(status.MPI_TAG == SQUIRREL_DEATH){
-      MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-      //handleSquirrelDeath(status.MPI_SOURCE);
-
-    }
-    else if(status.MPI_TAG == SQUIRREL_BIRTH){
-      float location[2];
-      MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-      //handleSquirrelBirth(status.MPI_SOURCE);
-    }
-    }
-  }
-  printf("finished probing squirrels\n");*/
-  //grid cells must be told to shutdown because they wait in a blocking receive
-  shutdownGridCells();
 }
 
 void MasterActor::shutdownGridCells(){
@@ -265,15 +185,4 @@ void MasterActor::shutdownGridCells(){
     //cout << "master shutting down grid "<<grid_ranks[i]<<endl;
     MPI_Send(NULL,0,MPI_INT, grid_ranks[i], GRID_SHUTDOWN, MPI_COMM_WORLD);
   }
-}
-
-//returns the number of requests still outstanding
-int MasterActor::testall(int count, MPI_Request* request){
-  int result = 0;
-  for(int i=0;i<count;i++){
-    int flag;
-    MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
-    if(flag == 0)result++;
-  }
-  return result;
 }

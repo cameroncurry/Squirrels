@@ -53,14 +53,6 @@ void SquirrelActor::waitForGridRanks(){
   this->grid_ranks = new int[N_grids];
   MPI_Recv(grid_ranks,N_grids,MPI_INT, 1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-  /*
-  if(infected == 0){
-    cout << "squirrel created on rank " << rank<<endl;
-  }
-  else {
-    cout << "infected squirrel created on rank "<<rank<<endl;
-  }*/
-
 }
 
 void SquirrelActor::act(){
@@ -78,31 +70,29 @@ void SquirrelActor::act(){
       stepIntoCell();
 
       //after every step squirrel may catch disease
-      if(steps > 0 && infected == 0){
+      if(steps > 0 && infected == 0 && shouldWorkerStop() == 0){
         int catchDisease = willCatchDisease(averageInfectionLevel(),&state);
         if(catchDisease == 1){
           infected = 1;
           infected_step = steps;
           MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
-          //std::cout << "squirrel "<<rank<<" will catch disease"<<std::endl;
+
         }
       }
 
       //if squirrel is infected, might die after minimum of 50 steps
-      if(infected == 1){
+      if(infected == 1 && shouldWorkerStop() == 0){
         if(steps > infected_step+50){ //it has been 50 steps
             int die = willDie(&state);
             if(die == 1){
-              //std::cout<<"squirrel "<<rank<<" dying"<<std::endl;
               MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
-              //acting = 1;
               break;
             }
         }
       }
 
       //after 50 timesteps, squirrel may give birth
-      if(steps > 0 && steps%50 == 0){
+      if(steps > 0 && steps%50 == 0 && shouldWorkerStop() == 0){
         int birth = willGiveBirth(averagePopInflux(), &state);
         if(birth == 1){
           //std::cout << "squirrel "<<rank<< " giving birth at "<<x<<" "<<y << std::endl;
