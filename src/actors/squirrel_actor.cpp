@@ -60,8 +60,6 @@ void SquirrelActor::act(){
   //to prevent dead lock, should worker stop is called before every message sending operation
   int acting = shouldWorkerStop();
   while(acting == 0){
-    //cout << "squirrel on rank "<<rank<<" squirreling"<<endl;
-    //usleep(10000);
     usleep((int)(squirrel_delay*1000000));
 
     acting = shouldWorkerStop();
@@ -75,7 +73,8 @@ void SquirrelActor::act(){
         if(catchDisease == 1){
           infected = 1;
           infected_step = steps;
-          MPI_Bsend(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
+          MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
+          if(SQURL_LOG)printf("COMM - squirrel %d sent infected message to master actor\n",rank);
         }
       }
 
@@ -84,7 +83,8 @@ void SquirrelActor::act(){
         if(steps > infected_step+50){ //it has been 50 steps
             int die = willDie(&state);
             if(die == 1){
-              MPI_Bsend(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
+              MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
+              if(SQURL_LOG)printf("COMM - squirrel %d sent dead message to master actor\n",rank);
               break;
             }
         }
@@ -98,6 +98,7 @@ void SquirrelActor::act(){
           location[0] = x;
           location[1] = y;
           MPI_Send(location,2,MPI_FLOAT, 1,SQUIRREL_BIRTH, MPI_COMM_WORLD);
+          if(SQURL_LOG)printf("COMM - squirrel %d sent location of child to master actor\n",rank);
         }
       }
       steps++;
@@ -122,12 +123,15 @@ void SquirrelActor::stepIntoCell(){
   //then receive back pop influx and infection level
   squirrelStep(x,y,&x,&y,&state);
   int cell = getCellFromPosition(x,y);
-  //std::cout <<"squirrel "<<rank<<" stepped into cell "<<cell<<std::endl;
+
+  if(SQURL_LOG)printf("COMM - squirrel %d sending to grid %d\n",rank,grid_ranks[cell]);
+
   MPI_Ssend(&infected,1, MPI_INT, grid_ranks[cell], cell, MPI_COMM_WORLD);
 
   int cellValues[2];
   MPI_Recv(cellValues,2,MPI_INT, grid_ranks[cell], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //std::cout << "squirrel "<<rank<<" received "<<cellValues[0]<<" "<<cellValues[1] << std::endl;
+
+  if(SQURL_LOG)printf("COMM - squirrel %d received %d, %d from grid %d\n",rank,cellValues[0],cellValues[1],grid_ranks[cell]);
 
   pop_influxes[steps%50] = cellValues[0];
   infect_levels[steps%50] = cellValues[1];

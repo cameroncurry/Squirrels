@@ -8,5 +8,5 @@ Actor::Actor(){
 
 
 void Actor::act(){
-  //cout << "acting on rank " << m_rank << endl;
+  return;
 }

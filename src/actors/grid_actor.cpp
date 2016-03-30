@@ -29,25 +29,19 @@ void GridActor::act(){
 
   //wait for squirrels or master actor to send a message
   while(waitingForMessages){
-    //int flag;
+
     MPI_Status status;
     MPI_Probe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 
-    //if(flag == 1){
     if(status.MPI_SOURCE == 1){
       handleMasterMessage();
     }
     else{
       handleSqurrielMessage(status.MPI_SOURCE);
     }
-    //}
+
   }
 
-  //cout << "grid "<<rank<<"shutting down"<<endl;
-  //gridShutdown();
-  //int flag;
-  //MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,MPI_STATUS_IGNORE);
-  //printf("grid %d finished with flag %d\n",rank,flag);
   if(SQURL_LOG)printf("INIT - Grid actor on rank %d shutting down\n",rank);
 }
 
@@ -94,29 +88,6 @@ void GridActor::handleSqurrielMessage(int source){
   current_month_influx++;
   current_month_infection += infected;
 }
-
-/*
- * Squirrel messages may be in flight when grid is told to shutdown
- * handle these messages before shutting down to avoid deadlock
- */
-void GridActor::gridShutdown(){
-  int flag;
-  do{
-    MPI_Status status;
-    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
-    if(flag == 1){
-      if(status.MPI_SOURCE != 0){
-        std::cout << "grid "<<rank<<" shutting down with flag "<<flag<<" from source " << status.MPI_SOURCE<<std::endl;
-        handleSqurrielMessage(status.MPI_SOURCE);
-      }
-      else {
-        //std::cout << "grid "<<rank<<" source 0 tag: "<<status.MPI_SOURCE<<std::endl;
-        flag = 0;
-      }
-    }
-  }while(flag == 1);
-}
-
 
 int GridActor::populationInflux(){
   return pop_influx[0]+pop_influx[1]+pop_influx[2];

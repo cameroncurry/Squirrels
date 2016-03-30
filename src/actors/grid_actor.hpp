@@ -19,8 +19,7 @@ private:
   void advanceMonth();
   void handleMasterMessage();
   void handleSqurrielMessage(int source);
-  void gridShutdown();
-  int populationInflux(); //total influx over the past 3 months
+  int populationInflux();
   int infectionLevel();
 };
 
