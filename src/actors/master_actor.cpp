@@ -203,7 +203,7 @@ void MasterActor::endSimulation(){
     int flag;
     MPI_Status status;
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&flag,&status);
-
+    printf("probing squirrel");
     if(flag == 1){
       printf("squirrel probed\n");
     if(status.MPI_TAG == SQUIRREL_INFECTED){
@@ -235,7 +235,7 @@ int MasterActor::testall(int count, MPI_Request* request){
   for(int i=0;i<count;i++){
     int flag;
     MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
-    if(flag == 1)result = 1;
+    if(flag == 0)result = 1;
   }
   return result;
 }
