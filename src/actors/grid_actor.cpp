@@ -29,17 +29,18 @@ void GridActor::act(){
 
   //wait for squirrels or master actor to send a message
   while(waitingForMessages){
+    int flag;
     MPI_Status status;
-    MPI_Probe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
 
-
+    if(flag == 1){	
     if(status.MPI_SOURCE == 1){
       handleMasterMessage();
     }
     else{
       handleSqurrielMessage(status.MPI_SOURCE);
     }
-
+    }
   }
 
   //cout << "grid "<<rank<<"shutting down"<<endl;

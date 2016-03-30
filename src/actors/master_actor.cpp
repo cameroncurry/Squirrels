@@ -102,7 +102,6 @@ void MasterActor::act(){
     advanceMonth(i);
   }
 
-  //cout << "master actor ending simulation, telling grid to shutdown"<<endl;
   //shutdown pool - effectively tells all squirrels to stop through process pool code
   shutdownPool();
 

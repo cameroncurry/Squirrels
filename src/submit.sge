@@ -1,0 +1,6 @@
+#!/bin/bash
+#$ -V
+#$ -l h_rt=:10:
+#$ -pe mpi 64
+#$ -cwd
+mpiexec -n 218 ./squirrels
