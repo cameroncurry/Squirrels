@@ -198,13 +198,14 @@ void MasterActor::endSimulation(){
     MPI_Irecv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, &requests[i]);
   }
 
-  //while()
 
-  //MPI_Waitall(N_squirrels,requests,statuses);
   while(testall(N_squirrels,requests)){
+    int flag;
     MPI_Status status;
-    MPI_Probe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&status);
+    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&flag,&status);
 
+    if(flag == 1){
+      printf("squirrel probed\n");
     if(status.MPI_TAG == SQUIRREL_INFECTED){
       handleSquirrelInfected(status.MPI_SOURCE);
     }
@@ -215,9 +216,8 @@ void MasterActor::endSimulation(){
     else if(status.MPI_TAG == SQUIRREL_BIRTH){
       handleSquirrelBirth(status.MPI_SOURCE);
     }
+    }
   }
-
-
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
