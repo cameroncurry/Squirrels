@@ -8,13 +8,15 @@
 
 using namespace std;
 
-SquirrelActor::SquirrelActor(int infected){
+SquirrelActor::SquirrelActor(int infected, double squirrel_delay){
+  this->squirrel_delay = squirrel_delay;
   this->infected = infected;
   this->x=0.0;
   this->y=0.0;
   contruct();
 }
-SquirrelActor::SquirrelActor(int infected,float x,float y){
+SquirrelActor::SquirrelActor(int infected,float x,float y, double squirrel_delay){
+  this->squirrel_delay = squirrel_delay;
   this->infected = infected;
   this->x = x;
   this->y = y;
@@ -67,7 +69,8 @@ void SquirrelActor::act(){
   int acting = shouldWorkerStop();
   while(acting == 0){
     //cout << "squirrel on rank "<<rank<<" squirreling"<<endl;
-    usleep(10000);
+    //usleep(10000);
+    usleep((int)(squirrel_delay*1000000));
 
     acting = shouldWorkerStop();
     if(acting == 0){
@@ -90,7 +93,7 @@ void SquirrelActor::act(){
         if(steps > infected_step+50){ //it has been 50 steps
             int die = willDie(&state);
             if(die == 1){
-              std::cout<<"squirrel "<<rank<<" dying"<<std::endl;
+              //std::cout<<"squirrel "<<rank<<" dying"<<std::endl;
               MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
               //acting = 1;
               break;
@@ -112,7 +115,7 @@ void SquirrelActor::act(){
       steps++;
     }
     else {
-      printf("squirrel %d stopping\n",rank);
+      //printf("squirrel %d stopping\n",rank);
       MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_ENDING, MPI_COMM_WORLD);
     }
 

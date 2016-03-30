@@ -6,7 +6,7 @@
 class MasterActor: public Actor
 {
 public:
-  MasterActor(int months, int grids, int squirrels, int infect_squirrels,int max_squirrels);
+  MasterActor(int months, double month_time, int grids, int squirrels, int infect_squirrels,int max_squirrels);
   ~MasterActor();
   void act();
 private:
@@ -23,17 +23,5 @@ private:
   void advanceMonth(int month);
   //void checkSquirrels();
 
-
-  /*
-  double month_time;
-  int N_grids;
-  int* grid_ranks;
-  int N_squirrels;
-  int* squirrel_ranks;
-  int squirrel_max;*/
-
-  //void distributeGridRanks();
-  //void advanceMonth();
-  //void createNewSquirrel(int source);
 };
 #endif

@@ -10,15 +10,16 @@
 using namespace std;
 
 
-MasterActor::MasterActor(int months, int grids, int squirrels, int infect_squirrels, int max_squirrels){
+MasterActor::MasterActor(int months, double month_time, int grids, int squirrels, int infect_squirrels, int max_squirrels){
 
+  printf("\nStarting simulation with %d squirrels, %d of which are infected\n\n",squirrels+infect_squirrels, infect_squirrels);
   if(SQURL_LOG)printf("INIT - Master actor created on rank %d\n",rank);
 
 
   this->months = months;
-  this->month_time = 1.0; //real time seconds
+  this->month_time = month_time; //real time seconds
   this->N_grids = grids;
-  this->N_squirrels = 0;
+  this->N_squirrels = 0; //these are updated in create squirrel function
   this->N_infected = 0;
   this->max_squirrels = max_squirrels;
 
@@ -74,7 +75,7 @@ void MasterActor::act(){
           N_squirrels--;
           N_infected--; //dead squirrel must be infected, so decrement count
           if(N_squirrels <= 0){
-            printf("All squrriels have died, ending simulation\n");
+            printf("\nAll squrriels have died, ending simulation\n\n");
             i = -1;
             break;
           }
@@ -88,7 +89,7 @@ void MasterActor::act(){
             MPI_Send(location,2,MPI_FLOAT, newSqurlID,SQUIRREL_BIRTH, MPI_COMM_WORLD);
           }
           else{ //not successful - kill simulation
-            printf("Maximum Number of Squirrels Reached: %d, ending simulation\n",N_squirrels);
+            printf("\nMaximum Number of Squirrels Reached: %d, ending simulation\n\n",N_squirrels);
             i = -1;
             break;
           }
@@ -134,7 +135,6 @@ int MasterActor::createNewSquirrel(int squirrel_type){
     return workerPid;
   }
   else {
-    printf("Too many squrriels\n");
     return -1;
   }
 
@@ -143,7 +143,7 @@ int MasterActor::createNewSquirrel(int squirrel_type){
 //tell grid cells to move to next month
 void MasterActor::advanceMonth(int month){
 
-  printf("After month %d:\nLive Squirrels: %d\nOf which are infected:%d\n",month,N_squirrels,N_infected);
+  printf("\nAfter month %d:\nLive Squirrels: %d\nOf which are infected:%d\n",month,N_squirrels,N_infected);
   printf("Population influx & Infection level for grid cells are:\n");
 
   for(int i=0;i<N_grids;i++){

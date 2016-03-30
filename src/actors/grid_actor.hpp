@@ -11,6 +11,8 @@ public:
 private:
   int month;
   int waitingForMessages;
+  int current_month_influx;
+  int current_month_infection;
   int pop_influx[3]; //population influx of the past 3 months
   int infect_level[2]; //infection level of the past 2 months
 

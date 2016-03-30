@@ -6,11 +6,12 @@
 class SquirrelActor: public Actor
 {
 public:
-  SquirrelActor(int infected);
-  SquirrelActor(int infected,float x,float y);
+  SquirrelActor(int infected, double squirrel_delay);
+  SquirrelActor(int infected,float x,float y, double squirrel_delay);
   ~SquirrelActor();
   void act();
 private:
+  double squirrel_delay;
   long state;
   int acting;
   int steps;

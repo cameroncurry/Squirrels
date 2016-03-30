@@ -1,4 +1,3 @@
-#include <iostream>
 #include <mpi.h>
 
 #include "pool.h"
@@ -17,9 +16,12 @@ int main(){
 
   int months = 4;
   int grids = 16;
-  int squirrels = 5;
+  int squirrels = 30;
   int infect_squirrels = 4;
-  int max_squirrels = 20;
+  int max_squirrels = 80;
+
+  double month_delay = 0.5; //seconds
+  double squirrel_delay = 0.01;
 
   MPI_Init(NULL,NULL);
   int statuscode = processPoolInit();
@@ -49,7 +51,7 @@ int main(){
       Actor *a;
 
       if(actor_code == MASTER_ACTOR){
-        MasterActor m = MasterActor(months,grids,squirrels,infect_squirrels,max_squirrels);
+        MasterActor m = MasterActor(months,month_delay,grids,squirrels,infect_squirrels,max_squirrels);
         a = &m;
         a->act();
       }
@@ -59,12 +61,12 @@ int main(){
         a->act();
       }
       else if(actor_code == SQUIRREL_ACTOR){
-        SquirrelActor s = SquirrelActor(0);
+        SquirrelActor s = SquirrelActor(0, squirrel_delay);
         a = &s;
         a->act();
       }
       else if(actor_code == INFECTED_SQUIRREL_ACTOR){
-        SquirrelActor s = SquirrelActor(1);
+        SquirrelActor s = SquirrelActor(1, squirrel_delay);
         a = &s;
         a->act();
       }
@@ -72,9 +74,8 @@ int main(){
         //newborn squirrel will recieve its coordinates
         float location[2];
         MPI_Recv(location,2,MPI_FLOAT, 1,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        cout << "new being born at "<<location[0]<<" "<<location[1]<<endl;
-        //cout << "new being born"<<endl;
-        SquirrelActor s = SquirrelActor(0,location[0],location[1]);
+
+        SquirrelActor s = SquirrelActor(0,location[0],location[1], squirrel_delay);
         a = &s;
         a->act();
       }
