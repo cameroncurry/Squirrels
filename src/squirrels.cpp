@@ -54,18 +54,22 @@ int main(){
       if(actor_code == MASTER_ACTOR){
         MasterActor m = MasterActor(months,month_delay,grids,squirrels,infect_squirrels,max_squirrels);
         a = &m;
+        a->act();
       }
       else if(actor_code == GRID_ACTOR){
         GridActor g = GridActor();
         a = &g;
+        a->act();
       }
       else if(actor_code == SQUIRREL_ACTOR){
         SquirrelActor s = SquirrelActor(0, squirrel_delay);
         a = &s;
+        a->act();
       }
       else if(actor_code == INFECTED_SQUIRREL_ACTOR){
         SquirrelActor s = SquirrelActor(1, squirrel_delay);
         a = &s;
+        a->act();
       }
       else if(actor_code == NEWBORN_SQUIRREL_ACTOR){
         //newborn squirrel will recieve its coordinates
@@ -74,9 +78,8 @@ int main(){
 
         SquirrelActor s = SquirrelActor(0,location[0],location[1], squirrel_delay);
         a = &s;
+        a->act();
       }
-
-      a->act();
     }while(workerSleep());
 
   }
