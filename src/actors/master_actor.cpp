@@ -47,8 +47,6 @@ MasterActor::MasterActor(int months, double month_time, int grids, int squirrels
     if(SQURL_LOG)printf("INIT - Master actor created infected squirrel actor on rank %d\n",workerPid);
   }
 
-
-
 }
 
 MasterActor::~MasterActor(){
@@ -58,7 +56,7 @@ MasterActor::~MasterActor(){
 void MasterActor::act(){
 
   for(int i=0;i<months;i++){
-    //cout << "master starting month "<<i << endl;
+
     double start_time = MPI_Wtime();
     do{
 
@@ -92,19 +90,22 @@ void MasterActor::act(){
     advanceMonth(i);
   }
 
-
-  endSimulation();
-  /*
-  //shutdown pool - effectively tells all squirrels to stop through process pool code
+  //shutdown process pool
+  //squirrels may still be in flight so keep handling squirrel messages until rank 0 says stop
   shutdownPool();
 
+  printf("starting to wait for squirrels\n");
   for(int i=0;i<N_squirrels;i++){
     MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
+  printf("all squirrels finished, shutting down grid\n");
+
+  //MPI_Status status;
+  //MPI_Wait(&request,&status);
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
-  */
+
 
   if(SQURL_LOG){printf("INIT - Master actor on rank %d shutting down\n",rank);}
 }
@@ -191,14 +192,14 @@ void MasterActor::endSimulation(){
   shutdownPool();
 
   //squirrel may still be in flight, post non blocking recieve for each squirrel still alive
-  MPI_Request requests[N_squirrels];
+  //MPI_Request requests[N_squirrels];
   //MPI_Status statuses[N_squirrels];
-
+  printf("rank 1 waiting for squirrels\n");
   for(int i=0;i<N_squirrels;i++){
-    MPI_Irecv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, &requests[i]);
+    MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 
-
+  /*
   while(testall(N_squirrels,requests) != 0){
     int flag;
     MPI_Status status;
@@ -222,7 +223,7 @@ void MasterActor::endSimulation(){
     }
     }
   }
-  printf("finished probing squirrels\n");
+  printf("finished probing squirrels\n");*/
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
 }

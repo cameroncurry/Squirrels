@@ -115,7 +115,6 @@ void SquirrelActor::act(){
       steps++;
     }
     else {
-      //printf("squirrel %d stopping\n",rank);
       MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_ENDING, MPI_COMM_WORLD);
     }
 
