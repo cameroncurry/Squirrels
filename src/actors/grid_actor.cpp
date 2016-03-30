@@ -1,6 +1,6 @@
 #include <mpi.h>
-#include <iostream>
-#include <unistd.h>
+#include <stdio.h>
+
 #include "pool.h"
 #include "squirrel_const.h"
 #include "grid_actor.hpp"

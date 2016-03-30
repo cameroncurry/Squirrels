@@ -1,10 +1,10 @@
 #include <mpi.h>
+#include <unistd.h>
+
 #include "pool.h"
 #include "squirrel_const.h"
 #include "squirrel_actor.hpp"
 #include "squirrel-functions.h"
-#include <iostream>
-#include <unistd.h>
 
 using namespace std;
 
