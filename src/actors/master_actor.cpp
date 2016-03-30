@@ -91,17 +91,49 @@ void MasterActor::act(){
   }
 
   //shutdown process pool
-  //squirrels may still be in flight so keep handling squirrel messages until rank 0 says stop
+  //squirrels may still be in flight so keep handling squirrel messages
   shutdownPool();
 
-  printf("starting to wait for squirrels\n");
-  for(int i=0;i<N_squirrels;i++){
-    MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-  printf("all squirrels finished, shutting down grid\n");
 
-  //MPI_Status status;
-  //MPI_Wait(&request,&status);
+  MPI_Request request[N_squirrels];
+  MPI_Status status[N_squirrels];
+  for(int i=0;i<N_squirrels;i++){
+    MPI_Irecv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, &request[i]);
+  }
+
+
+  while(1){
+    int requests_outstanding = 0;
+
+    for(int i=0;i<N_squirrels;i++){
+      int flag;
+      MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
+      if(!flag) requests_outstanding = 1;
+    }
+
+    if(requests_outstanding == 0){
+      break;
+    }
+    else{
+      int flag;
+      MPI_Status status;
+      MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
+      if(flag == 1){
+        if(status.MPI_TAG == SQUIRREL_INFECTED){
+          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else if(status.MPI_TAG == SQUIRREL_DEATH){
+          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else if(status.MPI_TAG == SQUIRREL_BIRTH){
+          float location[2];
+          MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+      }
+    }
+  }
+
+  //MPI_Waitall(N_squirrels,request,status);
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
