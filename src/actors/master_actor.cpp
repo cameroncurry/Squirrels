@@ -203,22 +203,26 @@ void MasterActor::endSimulation(){
     int flag;
     MPI_Status status;
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&flag,&status);
-    printf("probing squirrel");
+    //printf("probing squirrel");
     if(flag == 1){
-      printf("squirrel probed\n");
+      //printf("squirrel probed\n");
     if(status.MPI_TAG == SQUIRREL_INFECTED){
-      handleSquirrelInfected(status.MPI_SOURCE);
+      MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+      //handleSquirrelInfected(status.MPI_SOURCE);
     }
     else if(status.MPI_TAG == SQUIRREL_DEATH){
-      handleSquirrelDeath(status.MPI_SOURCE);
+      MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+      //handleSquirrelDeath(status.MPI_SOURCE);
 
     }
     else if(status.MPI_TAG == SQUIRREL_BIRTH){
-      handleSquirrelBirth(status.MPI_SOURCE);
+      float location[2];
+      MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+      //handleSquirrelBirth(status.MPI_SOURCE);
     }
     }
   }
-
+  printf("finished probing squirrels\n");
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
 }
