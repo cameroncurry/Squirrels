@@ -75,8 +75,7 @@ void SquirrelActor::act(){
         if(catchDisease == 1){
           infected = 1;
           infected_step = steps;
-          MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
-
+          MPI_Bsend(NULL,0,MPI_INT, 1,SQUIRREL_INFECTED, MPI_COMM_WORLD);
         }
       }
 
@@ -85,7 +84,7 @@ void SquirrelActor::act(){
         if(steps > infected_step+50){ //it has been 50 steps
             int die = willDie(&state);
             if(die == 1){
-              MPI_Send(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
+              MPI_Bsend(NULL,0,MPI_INT, 1,SQUIRREL_DEATH, MPI_COMM_WORLD);
               break;
             }
         }
@@ -95,7 +94,6 @@ void SquirrelActor::act(){
       if(steps > 0 && steps%50 == 0 && shouldWorkerStop() == 0){
         int birth = willGiveBirth(averagePopInflux(), &state);
         if(birth == 1){
-          //std::cout << "squirrel "<<rank<< " giving birth at "<<x<<" "<<y << std::endl;
           float location[2];
           location[0] = x;
           location[1] = y;

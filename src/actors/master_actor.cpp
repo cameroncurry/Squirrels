@@ -94,9 +94,11 @@ void MasterActor::act(){
   shutdownPool();
 
   //wait until all squirrels have stopped before stopping grid cells
+  printf("waiting for squirrels\n");
   for(int i=0;i<N_squirrels;i++){
     MPI_Recv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
+  printf("squirrels finished, shutting down grid\n");
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
