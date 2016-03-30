@@ -18,7 +18,7 @@ int main(){
   int grids = 16;
   int squirrels = 30;
   int infect_squirrels = 4;
-  int max_squirrels = 180;
+  int max_squirrels = 80;
 
   double month_delay = 0.5; //seconds
   double squirrel_delay = 0.01;
