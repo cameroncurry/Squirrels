@@ -199,7 +199,7 @@ void MasterActor::endSimulation(){
   }
 
 
-  while(testall(N_squirrels,requests)){
+  while(testall(N_squirrels,requests) != 0){
     int flag;
     MPI_Status status;
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&flag,&status);
@@ -230,12 +230,13 @@ void MasterActor::shutdownGridCells(){
   }
 }
 
+//returns the number of requests still outstanding
 int MasterActor::testall(int count, MPI_Request* request){
   int result = 0;
   for(int i=0;i<count;i++){
     int flag;
     MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
-    if(flag == 0)result = 1;
+    if(flag == 0)result++;
   }
   return result;
 }
