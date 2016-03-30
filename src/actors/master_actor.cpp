@@ -67,32 +67,22 @@ void MasterActor::act(){
       MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
       if(flag == 1){
         if(status.MPI_TAG == SQUIRREL_INFECTED){
-          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-          N_infected++;
+          handleSquirrelInfected(status.MPI_SOURCE);
         }
         else if(status.MPI_TAG == SQUIRREL_DEATH){
-          MPI_Recv(NULL,0,MPI_INT, status.MPI_SOURCE,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-          N_squirrels--;
-          N_infected--; //dead squirrel must be infected, so decrement count
-          if(N_squirrels <= 0){
-            printf("\nAll squrriels have died, ending simulation\n\n");
-            i = -1;
+          int err = handleSquirrelDeath(status.MPI_SOURCE);
+          if(err != 0){
+            i = err;
             break;
           }
         }
         else if(status.MPI_TAG == SQUIRREL_BIRTH){
-          float location[2];
-          MPI_Recv(location,2,MPI_FLOAT, status.MPI_SOURCE,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-
-          int newSqurlID = createNewSquirrel(NEWBORN_SQUIRREL_ACTOR);
-          if(newSqurlID != -1){ //birth was successful, send parent's coordinates
-            MPI_Send(location,2,MPI_FLOAT, newSqurlID,SQUIRREL_BIRTH, MPI_COMM_WORLD);
-          }
-          else{ //not successful - kill simulation
-            printf("\nMaximum Number of Squirrels Reached: %d, ending simulation\n\n",N_squirrels);
-            i = -1;
+          int err = handleSquirrelBirth(status.MPI_SOURCE);
+          if(err != 0){
+            i = err;
             break;
           }
+
         }
       }
 
@@ -102,6 +92,9 @@ void MasterActor::act(){
     advanceMonth(i);
   }
 
+
+  endSimulation();
+  /*
   //shutdown pool - effectively tells all squirrels to stop through process pool code
   shutdownPool();
 
@@ -111,10 +104,49 @@ void MasterActor::act(){
 
   //grid cells must be told to shutdown because they wait in a blocking receive
   shutdownGridCells();
-  //checkSquirrels();
+  */
 
   if(SQURL_LOG){printf("INIT - Master actor on rank %d shutting down\n",rank);}
 }
+
+
+/*
+ * Methods for handling all squirrel interactions
+ */
+
+void MasterActor::handleSquirrelInfected(int source){
+  MPI_Recv(NULL,0,MPI_INT, source,SQUIRREL_INFECTED, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  N_infected++;
+}
+
+int MasterActor::handleSquirrelDeath(int source){
+  MPI_Recv(NULL,0,MPI_INT, source,SQUIRREL_DEATH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  N_squirrels--;
+  N_infected--; //dead squirrel must be infected, so decrement count
+  if(N_squirrels <= 0){
+    printf("\nAll squrriels have died, ending simulation\n\n");
+    return -1;
+  }
+  else{
+    return 0;
+  }
+}
+
+int MasterActor::handleSquirrelBirth(int source){
+  float location[2];
+  MPI_Recv(location,2,MPI_FLOAT, source,SQUIRREL_BIRTH, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+
+  int newSqurlID = createNewSquirrel(NEWBORN_SQUIRREL_ACTOR);
+  if(newSqurlID != -1){ //birth was successful, send parent's coordinates
+    MPI_Send(location,2,MPI_FLOAT, newSqurlID,SQUIRREL_BIRTH, MPI_COMM_WORLD);
+    return 0;
+  }
+  else{ //not successful - kill simulation
+    printf("\nMaximum Number of Squirrels Reached: %d, ending simulation\n\n",N_squirrels);
+    return -1;
+  }
+}
+
 
 
 /*
@@ -154,6 +186,43 @@ void MasterActor::advanceMonth(int month){
   }
 }
 
+void MasterActor::endSimulation(){
+  //shutdown process pool - effectively tells all squirrels that they should stop
+  shutdownPool();
+
+  //squirrel may still be in flight, post non blocking recieve for each squirrel still alive
+  MPI_Request requests[N_squirrels];
+  //MPI_Status statuses[N_squirrels];
+
+  for(int i=0;i<N_squirrels;i++){
+    MPI_Irecv(NULL,0,MPI_INT, MPI_ANY_SOURCE,SQUIRREL_ENDING, MPI_COMM_WORLD, &requests[i]);
+  }
+
+  //while()
+
+  //MPI_Waitall(N_squirrels,requests,statuses);
+  while(testall(N_squirrels,requests)){
+    MPI_Status status;
+    MPI_Probe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD,&status);
+
+    if(status.MPI_TAG == SQUIRREL_INFECTED){
+      handleSquirrelInfected(status.MPI_SOURCE);
+    }
+    else if(status.MPI_TAG == SQUIRREL_DEATH){
+      handleSquirrelDeath(status.MPI_SOURCE);
+
+    }
+    else if(status.MPI_TAG == SQUIRREL_BIRTH){
+      handleSquirrelBirth(status.MPI_SOURCE);
+    }
+  }
+
+
+
+  //grid cells must be told to shutdown because they wait in a blocking receive
+  shutdownGridCells();
+}
+
 void MasterActor::shutdownGridCells(){
   for(int i=0;i<N_grids;i++){
     //cout << "master shutting down grid "<<grid_ranks[i]<<endl;
@@ -161,18 +230,12 @@ void MasterActor::shutdownGridCells(){
   }
 }
 
-/*
-void MasterActor::checkSquirrels(){
-
-  int flag;
-  MPI_Status status;
-  MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_SOURCE,MPI_COMM_WORLD,&flag,&status);
-
-  if(flag == 1){
-    cout << "squirrel "<<status.MPI_SOURCE<<" waiting"<<endl;
+int MasterActor::testall(int count, MPI_Request* request){
+  int result = 0;
+  for(int i=0;i<count;i++){
+    int flag;
+    MPI_Test(&request[i],&flag,MPI_STATUS_IGNORE);
+    if(flag == 1)result = 1;
   }
-  else{
-    cout << "no squirrels waiting for master "<<endl;
-  }
-
-}*/
+  return result;
+}

@@ -18,10 +18,15 @@ private:
   int N_grids;
   int* grid_ranks;
 
+  void handleSquirrelInfected(int source);
+  int handleSquirrelDeath(int source);
+  int handleSquirrelBirth(int source);
+
   void shutdownGridCells();
   int createNewSquirrel(int squirrel_type);
   void advanceMonth(int month);
-  //void checkSquirrels();
+  void endSimulation();
 
+  int testall(int count, MPI_Request* request);
 };
 #endif
