@@ -83,6 +83,7 @@ void GridActor::handleSqurrielMessage(int source){
   cellValues[0] = populationInflux();
   cellValues[1] = infectionLevel();
   MPI_Send(cellValues,2,MPI_INT, source,0, MPI_COMM_WORLD);
+  if(SQURL_LOG)printf("COMM - Grid actor on rank %d sent %d %d to squirrel %d\n",rank,cellValues[0],cellValues[1],source);
 
   //increment influx and infection level after sending back to squirrel
   current_month_influx++;

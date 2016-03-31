@@ -14,6 +14,11 @@ $ ./run n-procs
 ```
 eg. ./run 64 will run on 64 processes
 
+##Submit to Morar
+```
+$ qsub submit.sge
+```
+
 ##Verbose Output
 Verbose output is possible using `SQURL_LOG` variable in squirrel_const.h within actors directory.
 
@@ -30,3 +35,6 @@ $ ./run n-procs > squrl.log
 
 To see actors starting up and shutting down, grep for "INIT":
 `$ cat squrl.log | grep INIT`
+
+To see communications, grep from "COMM":
+`$ cat squrl.log | grep COMM`
